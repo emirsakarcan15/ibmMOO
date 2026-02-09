@@ -60,23 +60,30 @@ public_users.get('/isbn/:isbn',async function (req, res) {
  });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-  const author = req.params.author;
-  const booksByAuthor = [];
+public_users.get('/author/:author',async function (req, res) {
+  try {
+    const author = req.params.author;
+    const booksByAuthor = [];
 
-  const normalizeName = (name) => name.replace(/\s+/g, '')
-  
-  for (let isbn in books) {
-    if (normalizeName(books[isbn].author) === author) {
-      booksByAuthor.push(books[isbn]);
+    const normalizeName = (name) => name.replace(/\s+/g, '')
+
+    const bookList = await books;
+
+    for (let isbn in bookList) {
+      if (normalizeName(bookList[isbn].author) === author) {
+        booksByAuthor.push(bookList[isbn]);
+      }
     }
-  }
 
-  if (booksByAuthor.length === 0) {
-    return res.status(404).json({ message: "No books found by this author" });
-  }
+    if (booksByAuthor.length === 0) {
+      return res.status(404).json({ message: "No books found by this author" });
+    }
 
-  return res.status(300).json({books: booksByAuthor});
+    return res.status(300).json({books: booksByAuthor});
+    
+  } catch (error) {
+    return res.status(500).json({message: "Internal Server Error"});
+  }
 });
 
 // Get all books based on title
